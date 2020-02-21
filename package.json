@@ -1,0 +1,26 @@
+{
+  "name": "hackslash",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "dev": "parcel src/index.html",
+    "build": "parcel build src/index.html",
+    "watch": "parcel watch src/index.html"
+  },
+  "staticFiles": {
+    "staticPath": "public",
+    "watcherGlob": "**"
+  },
+  "devDependencies": {
+    "parcel-bundler": "^1.12.4",
+    "parcel-plugin-static-files-copy": "^2.3.1",
+    "typescript": "^3.7.5"
+  },
+  "dependencies": {
+    "matter-js": "^0.14.2",
+    "pixi.js": "^5.2.1",
+    "tslib": "^1.11.0",
+    "uuid": "^3.4.0"
+  }
+}
