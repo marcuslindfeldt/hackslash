@@ -13,6 +13,13 @@ export const normalize = ({ x, y }: Vec2): Vec2 => {
   return { x: x / m, y: y / m };
 };
 
+export const clampLength = (v: Vec2, maxLength: number): Vec2 => {
+  const m = magnitude(v);
+  if(m > maxLength)
+    return mult(normalize(v), maxLength);
+  return v;
+}
+
 export const clone = (v1: Vec2): Vec2 => ({
   x: v1.x,
   y: v1.y
