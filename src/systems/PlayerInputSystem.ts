@@ -1,8 +1,11 @@
 import { System } from "../lib/System";
-import { Motion } from "../components/Motion";
 import { MoveTarget } from "../components/MoveTarget";
 import { EntityManager } from "../entityManager";
+import { Physics } from "../components/Physics";
+import { Vec2 } from "planck-js";
+import { PPM } from "../constants";
 
+const toRadians = deg => deg * (Math.PI / 180);
 export class PlayerInputSystem implements System {
   pressedKeys = new Set<string>();
 
@@ -35,7 +38,7 @@ export class PlayerInputSystem implements System {
       em.addComponent(
         this.entityId,
         MoveTarget.typeName,
-        new MoveTarget({ x, y })
+        new MoveTarget(new Vec2(x / PPM, y / PPM))
       );
     };
 
@@ -57,16 +60,13 @@ export class PlayerInputSystem implements System {
   }
 
   update(em: EntityManager, dt: number) {
-    const SPEED = 10;
+    const physics = em.getComponent(this.entityId, Physics.typeName) as Physics;
+    const body = physics.body;
 
-    const motion = em.getComponent(this.entityId, Motion.typeName) as Motion;
-
-    // TODO: should probably only happen on keyup
-    motion.velocity.y = 0;
-    motion.velocity.x = 0;
+    body.setLinearVelocity(new Vec2(0, 0));
 
     if (this.pressedKeys.has("ArrowUp") && this.pressedKeys.has("ArrowDown")) {
-      motion.velocity.y = 0;
+      body.setLinearVelocity(new Vec2(0, 0));
       return;
     }
 
@@ -74,21 +74,51 @@ export class PlayerInputSystem implements System {
       this.pressedKeys.has("ArrowLeft") &&
       this.pressedKeys.has("ArrowRight")
     ) {
-      motion.velocity.x = 0;
+      body.setLinearVelocity(new Vec2(0, 0));
       return;
     }
 
-    if (this.pressedKeys.has("ArrowUp")) {
-      motion.velocity.y = -1 * SPEED;
-    }
-    if (this.pressedKeys.has("ArrowDown")) {
-      motion.velocity.y = 1 * SPEED;
-    }
-    if (this.pressedKeys.has("ArrowLeft")) {
-      motion.velocity.x = -1 * SPEED;
-    }
-    if (this.pressedKeys.has("ArrowRight")) {
-      motion.velocity.x = 1 * SPEED;
+    if (this.pressedKeys.has("ArrowUp") && this.pressedKeys.has("ArrowRight")) {
+      // NORT-EAST
+      body.setAngle(toRadians(-45));
+      body.setLinearVelocity(new Vec2(1, -1));
+    } else if (
+      this.pressedKeys.has("ArrowUp") &&
+      this.pressedKeys.has("ArrowLeft")
+    ) {
+      // NORT-WEST
+      body.setAngle(toRadians(-135));
+      body.setLinearVelocity(new Vec2(-1, -1));
+    } else if (
+      this.pressedKeys.has("ArrowDown") &&
+      this.pressedKeys.has("ArrowLeft")
+    ) {
+      // SOUTH-WEST
+      body.setAngle(toRadians(135));
+      body.setLinearVelocity(new Vec2(-1, 1));
+    } else if (
+      this.pressedKeys.has("ArrowDown") &&
+      this.pressedKeys.has("ArrowRight")
+    ) {
+      // SOUTH-EAST
+      body.setAngle(toRadians(45));
+      body.setLinearVelocity(new Vec2(1, 1));
+    } else if (this.pressedKeys.has("ArrowUp")) {
+      // NORTH
+      body.setAngle(toRadians(-90));
+      body.setLinearVelocity(new Vec2(0, -1));
+    } else if (this.pressedKeys.has("ArrowDown")) {
+      // SOUTH
+      body.setAngle(toRadians(90));
+      body.setLinearVelocity(new Vec2(body.getLinearVelocity().x, 1));
+    } else if (this.pressedKeys.has("ArrowLeft")) {
+      // WEST
+      body.setAngle(toRadians(180));
+      body.setLinearVelocity(new Vec2(-1, body.getLinearVelocity().y));
+    } else if (this.pressedKeys.has("ArrowRight")) {
+      // EAST
+      body.setAngle(toRadians(0));
+      body.setLinearVelocity(new Vec2(1, body.getLinearVelocity().y));
     }
   }
 }

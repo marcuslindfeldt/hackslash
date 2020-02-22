@@ -18,8 +18,10 @@
     "typescript": "^3.7.5"
   },
   "dependencies": {
+    "@types/matter-js": "^0.10.9",
     "matter-js": "^0.14.2",
     "pixi.js": "^5.2.1",
+    "planck-js": "^0.3.12",
     "tslib": "^1.11.0",
     "uuid": "^3.4.0"
   }

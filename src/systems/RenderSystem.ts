@@ -1,7 +1,8 @@
 import { System } from "../lib/System";
-import { Transform } from "../components/Transform";
 import { Sprite } from "../components/Sprite";
 import { EntityManager } from "../entityManager";
+import { Physics } from "../components/Physics";
+import { PPM } from "../constants";
 
 export class RenderSystem implements System {
   constructor() {}
@@ -14,14 +15,20 @@ export class RenderSystem implements System {
   //   }
 
   update(em: EntityManager, dt: number) {
-    const itr = em.componentIterator(Transform.typeName, Sprite.typeName);
+    const itr = em.componentIterator(Physics.typeName, Sprite.typeName);
 
     for (const e of itr) {
-      const transform = e.components[Transform.typeName] as Transform;
+      const physics = e.components[Physics.typeName] as Physics;
       const sprite = e.components[Sprite.typeName] as Sprite;
 
-      sprite.pixiSprite.position.x = transform.x;
-      sprite.pixiSprite.position.y = transform.y;
+      // Convert physics body meter values to pixels
+      const pos = physics.body
+        .getPosition()
+        .clone()
+        .mul(PPM);
+
+      sprite.pixiSprite.position.x = Math.round(pos.x);
+      sprite.pixiSprite.position.y = Math.round(pos.y);
     }
   }
 }

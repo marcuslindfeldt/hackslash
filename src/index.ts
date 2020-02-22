@@ -1,11 +1,11 @@
-import { ECS } from "./entityManager";
-import { RenderSystem } from "./systems/RenderSystem";
-import { PhysicsSystem } from "./systems/PhysicsSystem";
-
-import { PlayerInputSystem } from "./systems/PlayerInputSystem";
 import * as PIXI from "pixi.js";
-import { MovementSystem } from "./systems/MovementSystem";
+import planck, { Vec2 } from "planck-js";
 import mage from "./entities/mage";
+import { ECS } from "./entityManager";
+import { MovementSystem } from "./systems/MovementSystem";
+import { PhysicsVisualizationSystem } from "./systems/PhysicsVisualizationSystem";
+import { PlayerInputSystem } from "./systems/PlayerInputSystem";
+import { RenderSystem } from "./systems/RenderSystem";
 
 document.addEventListener("DOMContentLoaded", () => {
   const app = new PIXI.Application({
@@ -19,6 +19,10 @@ document.addEventListener("DOMContentLoaded", () => {
   document.body.appendChild(app.view);
 
   const loader = new PIXI.Loader();
+
+  const world = planck.World({
+    gravity: planck.Vec2(0, 0)
+  });
 
   // TODO: move asset loading somewhere else
   loader.add("sheet", "spritesheet.json").load((loader, resources) => {
@@ -47,28 +51,38 @@ document.addEventListener("DOMContentLoaded", () => {
     // sprite.animationSpeed = 0.167;
     // sprite.play();
 
-    const player = mage(app, texture, ecs, { x: 50, y: 50 });
+    const player = mage(app, texture, ecs, world, new Vec2(50, 50));
 
     // Build evil mages
     for (let index = 1; index <= 10; index++) {
-      mage(app, [resources.sheet.textures["mage-10.png"]], ecs, {
-        x: 50 * index,
-        y: 300
-      });
+      mage(
+        app,
+        [resources.sheet.textures["mage-10.png"]],
+        ecs,
+        world,
+        new Vec2(100 * index, 300)
+      );
     }
 
     ecs.addSystem(new PlayerInputSystem(ecs.entityManager, player));
-    ecs.addSystem(new PhysicsSystem());
-    ecs.addSystem(new RenderSystem());
     ecs.addSystem(new MovementSystem());
+    ecs.addSystem(new RenderSystem());
+    ecs.addSystem(new PhysicsVisualizationSystem(app));
+
+    const update = delta => {
+      world.step(delta);
+      ecs.update(delta);
+    };
+
+    // update(1);
 
     // run entitymanager (game engine) update function on each tick
-    app.ticker.add(ecs.update.bind(ecs));
+    app.ticker.add(update);
   });
 });
 
 // TODOLIST
-// - add direction to player
+// - add animated sprites based on direction
 // - add collision system
 // - add fireball entity with damage component
 // - add health component

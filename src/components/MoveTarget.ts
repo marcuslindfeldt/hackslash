@@ -1,4 +1,4 @@
-import { Vec2 } from "../utils/Vec2";
+import { Vec2 } from "planck-js";
 
 export class MoveTarget {
   static typeName = "MoveTarget";

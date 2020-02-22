@@ -1,37 +1,6 @@
 import { System } from "./lib/System";
 import { Component } from "./lib/Component";
-import { Motion } from "./components/Motion";
 import uuid from "uuid";
-
-// const entityId = ecs.createEntity() // unique id, stored in hashmap
-
-// ecs.addComponent<Motion>(entityId, { x: 0, y: 0}) // component needs a type
-// ecs.removeComponent<Motion>(entityId) // component needs a type
-
-// ecs.removeEntity(entityId) // needs to remove all components for entity.
-
-// empty entities can exist, its fine
-
-// you always have to define what components you want to remove? No! not if you delete an entity, entities needs references to the types of components that is attached to it.
-
-// deleting single entity should be O( nr of components in it),
-// looping over component tuples should be be O(n) with each component lookup for single entity O(1)
-// loop should only go over primary component (first in iterator args)
-// should be able to get entityId from within itr
-// should be able to delete entity from within itr
-// should be able to get sibling components from within itr
-// should be able to add sibling components from within itr
-// should be able to remove sibling components from within itr
-
-// update(ecs) {
-//   const itr = ecs.query('motion', 'move')
-
-//   // iterate component tuples
-//   for (const entity of itr) {
-//     entity.remove()
-//     entity.removeComponent()
-//   }
-// }
 
 type IteratorResult = {
   entityId: string;
@@ -44,8 +13,6 @@ export class EntityManager {
   components = new Map<string, Map<string, Component>>();
 
   entities = new Map<string, Set<string>>();
-
-  //  how do i delete an entity?
 
   addComponent<K extends Component>(
     entityId: string,
