@@ -2,7 +2,7 @@ import { System } from "../lib/System";
 import { EntityManager } from "../entityManager";
 import { Physics } from "../components/Physics";
 import * as PIXI from "pixi.js";
-import { PolygonShape } from "planck-js";
+import { PolygonShape, Vec2 } from "planck-js";
 import { PPM } from "../constants";
 
 export class PhysicsVisualizationSystem implements System {
@@ -51,15 +51,21 @@ export class PhysicsVisualizationSystem implements System {
         if (type == "polygon") {
           const polygon = shape as PolygonShape;
 
-          const vertices = polygon.m_vertices;
+          const vertices = polygon.m_vertices.map(v =>
+            Vec2(v.x * PPM, v.y * PPM)
+          );
 
-          this.graphics.moveTo(pos.x + vertices[0].x, pos.y + vertices[0].y);
+          let a = Vec2.add(pos, vertices[0]);
+
+          this.graphics.moveTo(a.x, a.y);
 
           for (var i = 1; i < vertices.length; ++i) {
-            this.graphics.lineTo(pos.x + vertices[i].x, pos.y + vertices[i].y);
+            let p = Vec2.add(pos, vertices[i]);
+
+            this.graphics.lineTo(p.x, p.y);
           }
 
-          this.graphics.lineTo(pos.x + vertices[0].x, pos.y + vertices[0].y);
+          this.graphics.lineTo(a.x, a.y);
         } else {
           console.log("physics body type graphics not implemented!", type);
         }
