@@ -7,25 +7,34 @@ import { PhysicsVisualizationSystem } from "./systems/PhysicsVisualizationSystem
 import { PlayerInputSystem } from "./systems/PlayerInputSystem";
 import { RenderSystem } from "./systems/RenderSystem";
 
+import loadMap, { drawMap } from "./map";
+
+PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
+
+console.log("window.devicePixelRatio", window.devicePixelRatio);
 document.addEventListener("DOMContentLoaded", () => {
   const app = new PIXI.Application({
     width: window.innerWidth,
     height: window.innerHeight,
-    backgroundColor: 0x1099bb,
     resizeTo: window,
-    resolution: window.devicePixelRatio || 1,
+    resolution: Math.floor(window.devicePixelRatio || 1),
     autoDensity: true
   });
   document.body.appendChild(app.view);
 
   const loader = new PIXI.Loader();
 
+  loadMap(loader);
+
   const world = planck.World({
     gravity: planck.Vec2(0, 0)
   });
 
+  loader.add("sheet", "spritesheet.json");
+
   // TODO: move asset loading somewhere else
-  loader.add("sheet", "spritesheet.json").load((loader, resources) => {
+  loader.load((loader, resources) => {
+    drawMap(app, resources);
     // resources is an object where the key is the name of the resource loaded and the value is the resource object.
     // They have a couple default properties:
     // - `url`: The URL that the resource was loaded from
