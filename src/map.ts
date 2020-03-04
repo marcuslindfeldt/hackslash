@@ -1,19 +1,85 @@
 import * as PIXI from "pixi.js";
 import map from "../public/tilemap.json";
+import { Vec2 } from "planck-js";
 
-// Very simple state storage because who needs classes in javascript?
-let mapInfo = {
-  numXTiles: map.width,
-  numYTiles: map.height,
-  tileSize: {
-    x: map.tilewidth,
-    y: map.tileheight
-  },
-  pixelSize: {
-    x: map.width * map.tilewidth,
-    y: map.height * map.tileheight
+export class TileSize{
+  /**
+   * Width of a tile in number of pixels
+   */
+  pixelsWidth: number;
+  /**
+   * Height of a tile in number of pixels
+   */
+  pixelsHeight: number;
+
+  constructor(pixelsWidth: number, pixelsHeight: number){
+    this.pixelsWidth = pixelsWidth;
+    this.pixelsHeight = pixelsHeight;
   }
-};
+}
+
+export class Tile{
+  id: any;
+  /**Tile index on x-axis */
+  x: number;
+  /**Tile index on y-axis */
+  y: number;
+  
+  constructor(id: any, x: number, y: number) {
+    this.id = id;
+    this.x = x;
+    this.y = y;
+  }
+}
+
+export class TileMap{
+  /**
+   * Map width in number of tiles
+   */
+  width: number;
+  /**
+   * Map height in number of tiles
+   */
+  height: number;
+  /**
+   * Size of one tile in pixels
+   */
+  tileSize: TileSize;
+  /**
+   * Map size in number of pixels
+   */
+  totalPixelSize: Vec2
+
+  constructor(map: any){
+    this.width = map.width;
+    this.height = map.height;
+    this.tileSize = new TileSize(map.tilewidth, map.tileheight);
+    this.totalPixelSize = new Vec2(this.width * this.tileSize.pixelsWidth, this.height * this.tileSize.pixelsHeight);
+  }
+
+  getTileInfo(tileId: number){
+    let i = 0;
+  
+    // Find the correct tileset
+    // E.g. tileIndex 167 means atlas (tileset) with firstgid 1 and tile position 166
+    while (tilesets[i] && tilesets[i].firstgid <= tileId) {
+      i += 1;
+    }
+  
+    let setForTile = tilesets[i - 1];
+  
+    // Get the local index of the tile
+    let localIndex = tileId - setForTile.firstgid;
+  
+    // calculate the X and Y coords
+    let localTileX = Math.floor(localIndex % setForTile.numXTiles);
+    let localTileY = Math.floor(localIndex / setForTile.numXTiles);
+  
+    return new Tile(setForTile.name, localTileX * tileMap.tileSize.pixelsWidth, localTileY * tileMap.tileSize.pixelsHeight);
+  };
+} 
+
+let tileMap = new TileMap(map);
 
 let tilesets: any[] = [];
 
@@ -35,13 +101,7 @@ const getTileInfo = (tileId: number) => {
   let localTileX = Math.floor(localIndex % setForTile.numXTiles);
   let localTileY = Math.floor(localIndex / setForTile.numXTiles);
 
-  return {
-    name: setForTile.name,
-    tile: {
-      x: localTileX * mapInfo.tileSize.x,
-      y: localTileY * mapInfo.tileSize.y
-    }
-  };
+  return new Tile(setForTile.name, localTileX * tileMap.tileSize.pixelsWidth, localTileY * tileMap.tileSize.pixelsHeight);
 };
 
 const load = (loader: PIXI.Loader) => {
@@ -54,8 +114,8 @@ const load = (loader: PIXI.Loader) => {
       name: tileset.name,
       imageheight: tileset.imageheight,
       imagewidth: tileset.imagewidth,
-      numXTiles: Math.floor(tileset.imagewidth / mapInfo.tileSize.x),
-      numYTiles: Math.floor(tileset.imageheight / mapInfo.tileSize.y)
+      numXTiles: Math.floor(tileset.imagewidth / tileMap.tileSize.pixelsWidth),
+      numYTiles: Math.floor(tileset.imageheight / tileMap.tileSize.pixelsHeight)
     });
   });
 
@@ -72,22 +132,22 @@ export const drawMap = (app: PIXI.Application, resources) => {
     if (layer.type === "tilelayer") {
       layer.data.forEach((tileId, tileIndex) => {
         if (tileId !== 0) {
-          const tileInfo = getTileInfo(tileId);
+          const tile = getTileInfo(tileId);
 
           let worldX =
-            Math.floor(tileIndex % mapInfo.numXTiles) * mapInfo.tileSize.x;
+            Math.floor(tileIndex % tileMap.width) * tileMap.tileSize.pixelsWidth;
           let worldY =
-            Math.floor(tileIndex / mapInfo.numXTiles) * mapInfo.tileSize.y;
+            Math.floor(tileIndex / tileMap.width) * tileMap.tileSize.pixelsHeight;
 
-          let texture: PIXI.Texture = resources[tileInfo.name].texture.clone();
+          let texture: PIXI.Texture = resources[tile.id].texture.clone();
 
           //Create a rectangle object that defines the position and
           //size of the sub-image you want to extract from the texture
           let rectangle = new PIXI.Rectangle(
-            tileInfo.tile.x,
-            tileInfo.tile.y,
-            mapInfo.tileSize.x,
-            mapInfo.tileSize.y
+            tile.x,
+            tile.y,
+            tileMap.tileSize.pixelsWidth,
+            tileMap.tileSize.pixelsHeight
           );
 
           //Tell the texture to use that rectangular section
