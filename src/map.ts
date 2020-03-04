@@ -50,11 +50,36 @@ export class TileMap{
    */
   totalPixelSize: Vec2
 
+  // TODO: Add class for tileset
+  tilesets: any[] = [];
+
   constructor(map: any){
     this.width = map.width;
     this.height = map.height;
     this.tileSize = new TileSize(map.tilewidth, map.tileheight);
     this.totalPixelSize = new Vec2(this.width * this.tileSize.pixelsWidth, this.height * this.tileSize.pixelsHeight);
+
+    this.setupTilesets(map);
+  }
+
+  private setupTilesets(map: any) {
+    map.tilesets.forEach((tileset: {
+      firstgid: any;
+      name: any;
+      imageheight: number;
+      imagewidth: number;
+    }) => {
+      this.tilesets.push({
+        firstgid: tileset.firstgid,
+        name: tileset.name,
+        imageheight: tileset.imageheight,
+        imagewidth: tileset.imagewidth,
+        numXTiles: Math.floor(tileset.imagewidth / this.tileSize.pixelsWidth),
+        numYTiles: Math.floor(tileset.imageheight / this.tileSize.pixelsHeight),
+        // fix image path because Tiled.app adds \| as path separators
+        image: tileset.image.replace("\\/", "/")
+      });
+    });
   }
 
   getTileInfo(tileId: number){
@@ -62,11 +87,11 @@ export class TileMap{
   
     // Find the correct tileset
     // E.g. tileIndex 167 means atlas (tileset) with firstgid 1 and tile position 166
-    while (tilesets[i] && tilesets[i].firstgid <= tileId) {
+    while (this.tilesets[i] && this.tilesets[i].firstgid <= tileId) {
       i += 1;
     }
   
-    let setForTile = tilesets[i - 1];
+    let setForTile = this.tilesets[i - 1];
   
     // Get the local index of the tile
     let localIndex = tileId - setForTile.firstgid;
@@ -81,42 +106,10 @@ export class TileMap{
 
 let tileMap = new TileMap(map);
 
-let tilesets: any[] = [];
-
-const getTileInfo = (tileId: number) => {
-  let i = 0;
-
-  // Find the correct tileset
-  // E.g. tileIndex 167 means atlas (tileset) with firstgid 1 and tile position 166
-  while (tilesets[i] && tilesets[i].firstgid <= tileId) {
-    i += 1;
-  }
-
-  let setForTile = tilesets[i - 1];
-
-  // Get the local index of the tile
-  let localIndex = tileId - setForTile.firstgid;
-
-  // calculate the X and Y coords
-  let localTileX = Math.floor(localIndex % setForTile.numXTiles);
-  let localTileY = Math.floor(localIndex / setForTile.numXTiles);
-
-  return new Tile(setForTile.name, localTileX * tileMap.tileSize.pixelsWidth, localTileY * tileMap.tileSize.pixelsHeight);
-};
-
 const load = (loader: PIXI.Loader) => {
-  map.tilesets.forEach(tileset => {
-    // fix image path because Tiled.app adds \| as path separators
-    loader.add(tileset.name, tileset.image.replace("\\/", "/"));
-
-    tilesets.push({
-      firstgid: tileset.firstgid,
-      name: tileset.name,
-      imageheight: tileset.imageheight,
-      imagewidth: tileset.imagewidth,
-      numXTiles: Math.floor(tileset.imagewidth / tileMap.tileSize.pixelsWidth),
-      numYTiles: Math.floor(tileset.imageheight / tileMap.tileSize.pixelsHeight)
-    });
+  tileMap.tilesets.forEach(tileset => {
+    
+    loader.add(tileset.name, tileset.image);
   });
 
   loader.on("complete", () => {
@@ -125,6 +118,7 @@ const load = (loader: PIXI.Loader) => {
 };
 
 export const drawMap = (app: PIXI.Application, resources) => {
+  // TODO: add layers to TileMap class, iterate through them
   map.layers.forEach((layer, layerIndex) => {
     let spriteLayer = new PIXI.Container();
 
@@ -132,7 +126,7 @@ export const drawMap = (app: PIXI.Application, resources) => {
     if (layer.type === "tilelayer") {
       layer.data.forEach((tileId, tileIndex) => {
         if (tileId !== 0) {
-          const tile = getTileInfo(tileId);
+          const tile = tileMap.getTileInfo(tileId);
 
           let worldX =
             Math.floor(tileIndex % tileMap.width) * tileMap.tileSize.pixelsWidth;
