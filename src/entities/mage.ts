@@ -3,6 +3,7 @@ import { Physics, Sprite } from "../components";
 import { Vec2, Box } from "planck-js";
 import { PPM } from "../constants";
 import { div } from "../utils/Vec2";
+import { Health } from '../components/Health';
 import { ECS } from '../entityManager';
 
 const createMage = (
@@ -35,6 +36,7 @@ const createMage = (
 
   ecs.entityManager.addComponent(mage, Physics.typeName, new Physics(body));
   ecs.entityManager.addComponent(mage, Sprite.typeName, new Sprite(sprite));
+  ecs.entityManager.addComponent(mage, Health.typeName, new Health(100, 100));
 
   return mage;
 };

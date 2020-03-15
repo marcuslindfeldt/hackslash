@@ -4,5 +4,6 @@ export class Sprite {
 
   constructor(sprite: PIXI.Sprite) {
     this.pixiSprite = sprite;
+    this.pixiSprite.zIndex = 1
   }
 }
