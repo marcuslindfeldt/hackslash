@@ -4,11 +4,12 @@ import { Physics } from "../components/Physics";
 import { Vec2, Box, Body } from "planck-js";
 import { PPM } from "../constants";
 import { div } from "../utils/Vec2";
+import { ECS } from '../entityManager';
 
 const createMage = (
   app,
   texture,
-  ecs,
+  ecs: ECS,
   world: planck.World,
   pos: Vec2,
   dynamic = false

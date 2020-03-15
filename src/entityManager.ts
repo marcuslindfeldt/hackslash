@@ -1,23 +1,25 @@
 import { System } from "./lib/System";
 import { Component } from "./lib/Component";
 import uuid from "uuid";
+import { Components } from './components';
 
-type IteratorResult = {
-  entityId: string;
-  components: {
-    [componentType: string]: Component;
-  };
+type EntityId = string;
+type ComponentType = keyof Components;
+
+type EntitySlice<T extends ComponentType> = {
+  entityId: EntityId;
+  components: Pick<Components, T>;
 };
 
 export class EntityManager {
-  components = new Map<string, Map<string, Component>>();
+  components = new Map<ComponentType, Map<EntityId, Component>>();
 
-  entities = new Map<string, Set<string>>();
+  entities = new Map<EntityId, Set<ComponentType>>();
 
-  addComponent<K extends Component>(
-    entityId: string,
-    componentType: string,
-    component
+  addComponent<T extends ComponentType>(
+    entityId: EntityId,
+    componentType: T,
+    component: Components[T]
   ) {
     if (!this.entities.get(entityId)) {
       console.log("no entity found!");
@@ -28,14 +30,14 @@ export class EntityManager {
     this.entities.get(entityId).add(componentType);
 
     const componentTypeMap =
-      this.components.get(componentType) || new Map<string, K>();
+      this.components.get(componentType) || new Map<string, Components[T]>();
 
     componentTypeMap.set(entityId, component);
 
     this.components.set(componentType, componentTypeMap);
   }
 
-  removeComponent(entityId: string, componentType: string) {
+  removeComponent(entityId: EntityId, componentType: ComponentType) {
     const componentTypeMap = this.components.get(componentType);
 
     if (!componentTypeMap) {
@@ -45,24 +47,24 @@ export class EntityManager {
     return componentTypeMap.delete(entityId);
   }
 
-  getComponent(entityId: string, componentType: string) {
+  getComponent<T extends ComponentType>(entityId: string, componentType: T): Components[T] {
     const map = this.components.get(componentType);
     if (map) {
-      return map.get(entityId);
+      return map.get(entityId) as Components[T];
     }
 
     return null;
   }
 
-  createEntity(): string {
+  createEntity(): EntityId {
     const id = uuid();
 
-    this.entities.set(id, new Set<string>());
+    this.entities.set(id, new Set<ComponentType>());
 
     return id;
   }
 
-  deleteEntity(entityId: string) {
+  deleteEntity(entityId: EntityId) {
     const componentTypes = this.entities.get(entityId);
     this.entities.delete(entityId);
 
@@ -74,24 +76,19 @@ export class EntityManager {
     }
   }
 
-  *componentIterator(componentType, ...siblingTypes) {
-    const cType = this.components.get(componentType);
+  *componentIterator<T extends ComponentType>(componentType: T, ...siblingTypes: T[]): IterableIterator<EntitySlice<T>> {
+    const entityComponentMap = this.components.get(componentType);
 
-    if (!cType) {
+    if (!entityComponentMap) {
       return;
     }
-    const typeMap = cType.entries();
 
-    let c = typeMap.next();
+    for (const [entityId, component] of entityComponentMap) {
+      const siblingComponents = siblingTypes.reduce<Partial<Pick<Components, T>>>((acc, siblingType) => {
+        const siblingComponent = this.getComponent(entityId, siblingType);
 
-    while (!c.done) {
-      const [entityId, component] = c.value;
-
-      const siblingComponents = siblingTypes.reduce((acc, siblingType) => {
-        const component = this.getComponent(entityId, siblingType);
-
-        if (component) {
-          acc[siblingType] = component;
+        if (siblingComponent) {
+          acc[siblingType] = siblingComponent;
         }
 
         return acc;
@@ -101,13 +98,11 @@ export class EntityManager {
         yield {
           entityId,
           components: {
-            [componentType]: component,
-            ...siblingComponents
+            [componentType]: component as Components[T],
+            ...siblingComponents as any
           }
-        } as IteratorResult;
+        };
       }
-
-      c = typeMap.next();
     }
   }
 
