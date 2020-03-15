@@ -18,8 +18,9 @@ document.addEventListener("DOMContentLoaded", () => {
     height: window.innerHeight,
     resizeTo: window,
     resolution: Math.floor(window.devicePixelRatio || 1),
-    autoDensity: true
+    autoDensity: true,
   });
+  app.stage.sortableChildren = true;
   document.body.appendChild(app.view);
 
   const loader = new PIXI.Loader();

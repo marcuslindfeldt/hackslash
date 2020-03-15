@@ -106,7 +106,7 @@ export const drawMap = (app: PIXI.Application, resources) => {
       });
 
       // Add the correct zIndex to the layer, based on index in layer array
-      spriteLayer.zIndex = layerIndex;
+      spriteLayer.zIndex = layer.properties?.find(({ name }) => name === "zIndex")?.value || 0
 
       // render the entire layer on the stage
       app.stage.addChild(spriteLayer);
