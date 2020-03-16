@@ -8,6 +8,8 @@ import { PlayerInputSystem } from "./systems/PlayerInputSystem";
 import { RenderSystem } from "./systems/RenderSystem";
 
 import loadMap, { drawMap } from "./map";
+import { TransformSystem } from './systems/TransformSystem';
+import { HealthBarSystem } from './systems/HealthBarSystem';
 
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
@@ -61,14 +63,14 @@ document.addEventListener("DOMContentLoaded", () => {
     // sprite.animationSpeed = 0.167;
     // sprite.play();
 
-    const player = mage(app, texture, ecs, world, new Vec2(50, 50), true);
+    const player = mage(app, texture, ecs.entityManager, world, new Vec2(50, 50), true);
 
     // Build evil mages
     for (let index = 1; index <= 10; index++) {
       mage(
         app,
         [resources.sheet.textures["mage-10.png"]],
-        ecs,
+        ecs.entityManager,
         world,
         new Vec2(64 * index, 300)
       );
@@ -76,7 +78,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     ecs.addSystem(new PlayerInputSystem(ecs.entityManager, player));
     ecs.addSystem(new MovementSystem());
+    ecs.addSystem(new HealthBarSystem());
     ecs.addSystem(new RenderSystem());
+    ecs.addSystem(new TransformSystem());
     ecs.addSystem(new PhysicsVisualizationSystem(app));
 
     world.on("begin-contact", (contact: Contact) => {
