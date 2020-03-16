@@ -1,7 +1,7 @@
 import { Body } from "planck-js";
 
 export class Physics {
-  static typeName = "Physics" as const;
+  static typeName = "physics" as const;
   body: Body;
 
   constructor(body: Body) {

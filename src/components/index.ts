@@ -7,3 +7,9 @@ export type Components = {
   [Physics.typeName]: Physics
   [Sprite.typeName]: Sprite
 }
+
+export {
+  MoveTarget,
+  Physics,
+  Sprite
+}

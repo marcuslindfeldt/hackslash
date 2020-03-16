@@ -1,26 +1,15 @@
 import { System } from "../lib/System";
-import { Sprite } from "../components/Sprite";
+import { Sprite, Physics } from "../components";
 import { EntityManager } from "../entityManager";
-import { Physics } from "../components/Physics";
 import { PPM } from "../constants";
 
 export class RenderSystem implements System {
   constructor() {}
 
-  //   onAttach(cm: any) {
-  //     console.log("system attached");
-  //     // this.components = componentManager;
-
-  //     this.tuples = cm.withComponents(Renderable, Transform);
-  //   }
-
   update(em: EntityManager, dt: number) {
     const itr = em.componentIterator(Physics.typeName, Sprite.typeName);
 
-    for (const e of itr) {
-      const physics = e.components.Physics;
-      const sprite = e.components.Sprite;
-
+    for (const { components: { physics, sprite } } of itr) {
       // Convert physics body meter values to pixels
       const pos = physics.body
         .getPosition()

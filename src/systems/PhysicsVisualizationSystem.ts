@@ -17,8 +17,7 @@ export class PhysicsVisualizationSystem implements System {
     const itr = em.componentIterator(Physics.typeName);
     this.graphics.clear();
 
-    for (const e of itr) {
-      const physics = e.components[Physics.typeName] as Physics;
+    for (const { components: { physics }} of itr) {
       const body = physics.body;
       this.graphics.lineStyle(1, 0xff2cb4);
 

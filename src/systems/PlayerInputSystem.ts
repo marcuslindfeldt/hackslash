@@ -1,7 +1,6 @@
 import { System } from "../lib/System";
-import { MoveTarget } from "../components/MoveTarget";
+import { MoveTarget, Physics } from "../components";
 import { EntityManager } from "../entityManager";
-import { Physics } from "../components/Physics";
 import { Vec2 } from "planck-js";
 import { PPM } from "../constants";
 

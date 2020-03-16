@@ -1,5 +1,5 @@
 export class Sprite {
-  static typeName = "Sprite" as const;
+  static typeName = "sprite" as const;
   pixiSprite: PIXI.Sprite;
 
   constructor(sprite: PIXI.Sprite) {

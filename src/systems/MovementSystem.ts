@@ -22,17 +22,13 @@ export class MovementSystem implements System {
   update(em: EntityManager, dt: number) {
     const itr = em.componentIterator(MoveTarget.typeName, Physics.typeName);
 
-    for (const e of itr) {
-      // Arrange
-      const moveTarget = e.components[MoveTarget.typeName] as MoveTarget;
-      const physics = e.components[Physics.typeName] as Physics;
-      
+    for (const { entityId, components: { moveTarget, physics }} of itr) {
       // Act
       this.updateData(moveTarget, physics, dt);
 
       // Finish
       if (this.didReachTarget(moveTarget, physics)) {
-        em.removeComponent(e.entityId, MoveTarget.typeName);
+        em.removeComponent(entityId, MoveTarget.typeName);
       }
     }
   }
@@ -40,13 +36,13 @@ export class MovementSystem implements System {
   /**
    * The method where components are updated
    * For all but the non trivial this should call methods whith clear names, making for easy reading (y'know, like prose)
-   * @param moveTarget 
-   * @param physics 
-   * @param dt 
+   * @param moveTarget
+   * @param physics
+   * @param dt
    */
   private updateData(moveTarget: MoveTarget, physics: Physics, dt: number) {
     let target = moveTarget.position;
-    
+
     // TODO: not sure this is necessary, do you really want to rotate the physics body? I think it would make more sense to have a circle collider for characters
     // calculate angle
     this.turn(target, physics);
@@ -57,8 +53,8 @@ export class MovementSystem implements System {
 
   /**
    * Calculates the angle the body is moving and rotates the rigidbody accordingly
-   * @param target 
-   * @param physics 
+   * @param target
+   * @param physics
    */
   private turn(target: Vec2, physics: Physics) {
     let diff = Vec2.sub(target, physics.body.getPosition());
