@@ -1,9 +1,6 @@
 import * as PIXI from "pixi.js";
-import { Physics } from "../components/Physics";
-import { Health } from '../components/Health';
+import { Health, HealthBar, Sprite, Transform, Position } from '../components';
 import { EntityManager } from '../entityManager';
-import { Sprite } from '../components/Sprite';
-import { Transform } from '../components/Transform';
 
 const style = new PIXI.TextStyle({
   fontFamily: 'Arial',
@@ -26,18 +23,19 @@ const createHealthBar = (
   app,
   entityManager: EntityManager,
   health: Health,
-  physics: Physics,
+  position: Position,
   transform: Transform,
 ) => {
-  const basicText = new PIXI.Text(`${health.value} / ${health.max}`, style);
+  const basicText = new PIXI.Text('', style);
   app.stage.addChild(basicText);
 
   const healthBar = entityManager.createEntity();
 
-  entityManager.addComponent(healthBar, Physics.typeName, physics);
+  entityManager.addComponent(healthBar, Position.typeName, position);
   entityManager.addComponent(healthBar, Health.typeName, health);
-  entityManager.addComponent(healthBar, Sprite.typeName, new Sprite(basicText));
   entityManager.addComponent(healthBar, Transform.typeName, transform);
+  entityManager.addComponent(healthBar, Sprite.typeName, new Sprite(basicText))
+  entityManager.addComponent(healthBar, HealthBar.typeName, new HealthBar(basicText))
 
   return healthBar;
 };

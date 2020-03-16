@@ -7,9 +7,10 @@ import { Health } from '../components/Health';
 import { EntityManager } from '../entityManager';
 import createHealthBar from './healthBar';
 import { Transform } from '../components/Transform';
+import { Position } from '../components';
 
 const createMage = (
-  app,
+  app: PIXI.Application,
   texture,
   entityManager: EntityManager,
   world: planck.World,
@@ -36,12 +37,13 @@ const createMage = (
   body.setPosition(div(pos, PPM));
   body.createFixture(Box(sprite.height / (2 * PPM), sprite.width / (2 * PPM)));
 
-  const physics = new Physics(body);
   const health = new Health(100, 100);
+  const position = new Position();
 
-  createHealthBar(app, entityManager, health, physics, new Transform(new Vec2(-sprite.width/2, sprite.height/2)));
+  createHealthBar(app, entityManager, health, position, new Transform(new Vec2(-sprite.width/2, sprite.height/2)));
 
-  entityManager.addComponent(mage, Physics.typeName, physics);
+  entityManager.addComponent(mage, Physics.typeName, new Physics(body));
+  entityManager.addComponent(mage, Position.typeName, position);
   entityManager.addComponent(mage, Sprite.typeName, new Sprite(sprite));
   entityManager.addComponent(mage, Health.typeName, health);
 

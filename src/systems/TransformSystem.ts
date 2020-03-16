@@ -9,10 +9,7 @@ export class TransformSystem implements System {
   update(em: EntityManager, dt: number) {
     const itr = em.componentIterator(Transform.typeName, Sprite.typeName);
 
-    for (const e of itr) {
-      const transform = e.components.Transform;
-      const sprite = e.components.Sprite;
-
+    for (const { components: { transform, sprite }} of itr) {
       sprite.pixiSprite.position.x += transform.transform.x;
       sprite.pixiSprite.position.y += transform.transform.y;
     }

@@ -1,10 +1,10 @@
 export class Health {
   static typeName = <const> "health";
-  value: number;
+  current: number;
   max: number;
 
-  constructor(currentHealth: number, maxHealth: number) {
-    this.value = currentHealth;
+  constructor(current: number, maxHealth: number) {
+    this.current = current;
     this.max = maxHealth;
   }
 }

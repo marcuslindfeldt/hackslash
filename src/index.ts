@@ -10,6 +10,7 @@ import { RenderSystem } from "./systems/RenderSystem";
 import loadMap, { drawMap } from "./map";
 import { TransformSystem } from './systems/TransformSystem';
 import { HealthBarSystem } from './systems/HealthBarSystem';
+import { PhysicsSystem } from './systems/PhysicsSystem';
 
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
@@ -78,6 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     ecs.addSystem(new PlayerInputSystem(ecs.entityManager, player));
     ecs.addSystem(new MovementSystem());
+    ecs.addSystem(new PhysicsSystem(world))
     ecs.addSystem(new HealthBarSystem());
     ecs.addSystem(new RenderSystem());
     ecs.addSystem(new TransformSystem());
@@ -93,15 +95,8 @@ document.addEventListener("DOMContentLoaded", () => {
       console.log("contact", contact);
     });
 
-    const update = delta => {
-      world.step(delta);
-      ecs.update(delta);
-    };
-
-    // update(1);
-
     // run entitymanager (game engine) update function on each tick
-    app.ticker.add(update);
+    app.ticker.add((dt) => ecs.update(dt));
   });
 });
 

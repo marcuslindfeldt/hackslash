@@ -28,7 +28,7 @@ export class PlayerInputSystem implements System {
       true
     );
 
-    const onMouse = event => {
+    const onMouse = (event: MouseEvent) => {
       const x = event.clientX;
       const y = event.clientY;
 
