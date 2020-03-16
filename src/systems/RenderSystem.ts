@@ -18,8 +18,8 @@ export class RenderSystem implements System {
     const itr = em.componentIterator(Physics.typeName, Sprite.typeName);
 
     for (const e of itr) {
-      const physics = e.components[Physics.typeName] as Physics;
-      const sprite = e.components[Sprite.typeName] as Sprite;
+      const physics = e.components.Physics;
+      const sprite = e.components.Sprite;
 
       // Convert physics body meter values to pixels
       const pos = physics.body

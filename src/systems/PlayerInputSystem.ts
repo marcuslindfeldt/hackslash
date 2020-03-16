@@ -60,7 +60,7 @@ export class PlayerInputSystem implements System {
   }
 
   update(em: EntityManager, dt: number) {
-    const physics = em.getComponent(this.entityId, Physics.typeName) as Physics;
+    const physics = em.getComponent(this.entityId, Physics.typeName);
     const body = physics.body;
 
     body.setLinearVelocity(new Vec2(0, 0));
