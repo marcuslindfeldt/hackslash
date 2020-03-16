@@ -1,5 +1,5 @@
 export class Health {
-  static typeName = <const> "Health";
+  static typeName = <const> "health";
   value: number;
   max: number;
 
