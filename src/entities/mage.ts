@@ -3,12 +3,16 @@ import { Physics, Sprite } from "../components";
 import { Vec2, Box } from "planck-js";
 import { PPM } from "../constants";
 import { div } from "../utils/Vec2";
-import { ECS } from '../entityManager';
+import { Health } from '../components/Health';
+import { EntityManager } from '../entityManager';
+import createHealthBar from './healthBar';
+import { Transform } from '../components/Transform';
+import { Position } from '../components';
 
 const createMage = (
-  app,
+  app: PIXI.Application,
   texture,
-  ecs: ECS,
+  entityManager: EntityManager,
   world: planck.World,
   pos: Vec2,
   dynamic = false
@@ -16,7 +20,7 @@ const createMage = (
   let sprite = new PIXI.AnimatedSprite(texture);
   app.stage.addChild(sprite);
 
-  const mage = ecs.entityManager.createEntity();
+  const mage = entityManager.createEntity();
   const body = world.createBody();
 
   if (dynamic) {
@@ -33,8 +37,15 @@ const createMage = (
   body.setPosition(div(pos, PPM));
   body.createFixture(Box(sprite.height / (2 * PPM), sprite.width / (2 * PPM)));
 
-  ecs.entityManager.addComponent(mage, Physics.typeName, new Physics(body));
-  ecs.entityManager.addComponent(mage, Sprite.typeName, new Sprite(sprite));
+  const health = new Health(100, 100);
+  const position = new Position();
+
+  createHealthBar(app, entityManager, health, position, new Transform(new Vec2(-sprite.width/2, sprite.height/2)));
+
+  entityManager.addComponent(mage, Physics.typeName, new Physics(body));
+  entityManager.addComponent(mage, Position.typeName, position);
+  entityManager.addComponent(mage, Sprite.typeName, new Sprite(sprite));
+  entityManager.addComponent(mage, Health.typeName, health);
 
   return mage;
 };

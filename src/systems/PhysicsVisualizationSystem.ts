@@ -39,7 +39,6 @@ export class PhysicsVisualizationSystem implements System {
 
       for (
         var fixture = body.getFixtureList();
-        fixture;
         fixture = fixture.getNext()
       ) {
         // draw or update fixture

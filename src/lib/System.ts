@@ -1,4 +1,6 @@
+import { EntityManager } from '../entityManager';
+
 export interface System {
   // onAttach: () => void;
-  update: (cs: any, dt: Number) => void;
+  update: (em: EntityManager, dt: Number) => void;
 }

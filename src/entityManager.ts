@@ -1,5 +1,4 @@
 import { System } from "./lib/System";
-import { Component } from "./lib/Component";
 import uuid from "uuid";
 import { Components } from './components';
 
@@ -9,10 +8,10 @@ type ComponentType = keyof Components;
 type EntitySlice<T extends ComponentType> = {
   entityId: EntityId;
   components: Pick<Components, T>;
-};
+}
 
 export class EntityManager {
-  components = new Map<ComponentType, Map<EntityId, Component>>();
+  components = new Map<ComponentType, Map<EntityId, Components[ComponentType]>>();
 
   entities = new Map<EntityId, Set<ComponentType>>();
 
@@ -30,7 +29,7 @@ export class EntityManager {
     this.entities.get(entityId).add(componentType);
 
     const componentTypeMap =
-      this.components.get(componentType) || new Map<string, Components[T]>();
+      this.components.get(componentType) || new Map<ComponentType, Components[T]>();
 
     componentTypeMap.set(entityId, component);
 
@@ -48,9 +47,9 @@ export class EntityManager {
   }
 
   getComponent<T extends ComponentType>(entityId: string, componentType: T): Components[T] {
-    const map = this.components.get(componentType);
+    const map = this.components.get(componentType) as Map<EntityId, Components[T]>;
     if (map) {
-      return map.get(entityId) as Components[T];
+      return map.get(entityId);
     }
 
     return null;
